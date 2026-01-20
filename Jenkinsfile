@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = "nodejs-k8s-app"
         IMAGE_TAG = "1.0.${BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "mgelvoleo"
+        KEEP_IMAGES=2
     }
 
     stages {
@@ -42,6 +43,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Cleanup Local Docker Images') {
+            steps {
+                sh '''
+                
+                echo "🧹 Cleaning up local Docker images (keeping latest $KEEP_IMAGES)"
+
+                docker images "${DOCKERHUB_USERNAME}/${IMAGE_NAME}" \
+                --format "{{.Repository}}:{{.Tag}} {{.CreatedAt}}" | \
+                sort -rk2 | \
+                tail -n +$((KEEP_IMAGES+1)) | \
+                awk '{print $1}' | \
+                xargs -r docker rmi -f
+                '''
+            }
+        }
+
     }
     
 }
