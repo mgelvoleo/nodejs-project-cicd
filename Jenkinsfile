@@ -8,11 +8,25 @@ pipeline {
     }
 
     stages {
+        
         stage('Checkout') {
             steps {
                 echo '=== Checking out source code ==='
                 git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: 'main'
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo '=== Building Docker image ==='
+                    sh """
+                        docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+                    """
+                }
+            }
+        }
     }
+    
 }
