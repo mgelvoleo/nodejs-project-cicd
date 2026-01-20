@@ -44,6 +44,40 @@ pipeline {
             }
         }
 
+        stage('Cleanup Docker Hub Images') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "🧹 Cleaning up Docker Hub images (keeping latest ${KEEP_IMAGES})"
+
+                    TOKEN=$(curl -s -X POST https://hub.docker.com/v2/users/login/ \
+                    -H "Content-Type: application/json" \
+                    -d '{"username": "'$DOCKER_USER'", "password": "'$DOCKER_PASS'"}' | jq -r .token)
+
+                    curl -s -H "Authorization: JWT $TOKEN" \
+                    "https://hub.docker.com/v2/repositories/${DOCKER_USER}/${IMAGE_NAME}/tags/?page_size=100" | \
+                    jq -r '.results // [] 
+                        | map(select(.name | startswith("1.0."))) 
+                        | sort_by(.last_updated) 
+                        | reverse 
+                        | .[${KEEP_IMAGES}:] 
+                        | .[].name' | \
+                    while read TAG; do
+                        echo "Deleting remote tag: $TAG"
+                        curl -s -X DELETE \
+                        -H "Authorization: JWT $TOKEN" \
+                        "https://hub.docker.com/v2/repositories/${DOCKER_USER}/${IMAGE_NAME}/tags/$TAG/"
+                    done
+                    '''
+                }
+            }
+        }
+
+
         stage('Cleanup Local Docker Images') {
             steps {
                 sh '''
