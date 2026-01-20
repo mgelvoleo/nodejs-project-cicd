@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
     res.json({
-        message: 'Hello from Kubernetes!',
+        message: 'Hello from Kubernetes! test interate 1',
         hostname: os.hostname(),
         version: process.env.APP_VERSION || '1.0.0',
         timestamp: new Date().toISOString()
