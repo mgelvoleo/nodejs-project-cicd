@@ -27,6 +27,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    echo '=== Pushing to DockerHub ==='
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh """
+                            echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                            docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
+                            docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+                        """
+                    }
+                }
+            }
+        }
     }
     
 }
