@@ -6,6 +6,7 @@ pipeline {
         IMAGE_TAG = "1.0.${BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "mgelvoleo"
         KEEP_IMAGES=2
+        KUBECONFIG = "/var/jenkins_home/.kube/config"
     }
 
     stages {
@@ -120,6 +121,20 @@ pipeline {
                 tail -n +$((KEEP_IMAGES+1)) | \
                 awk '{print $1}' | \
                 xargs -r docker rmi -f
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/namespace.yaml
+                kubectl apply -f k8s/service.yaml
+                kubectl apply -f k8s/deployment.yaml
+                            
+                # Wait for rollout
+                kubectl rollout status deployment/nodejs-app -n dev --timeout=300s"  
+
                 '''
             }
         }
