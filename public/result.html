@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Results</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Voting Results</h1>
+            <p>Real-time voting statistics</p>
+        </header>
+
+        <div class="results-section">
+            <div class="summary">
+                <h2>Summary</h2>
+                <div id="summary">Loading...</div>
+            </div>
+
+            <div class="chart">
+                <h2>Vote Distribution</h2>
+                <div id="chart">Loading...</div>
+            </div>
+
+            <div class="recent-votes">
+                <h2>Recent Votes</h2>
+                <div id="history">Loading...</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="btn btn-primary">← Back to Voting</a>
+            <button onclick="resetVotes()" class="btn btn-danger">Reset All Votes</button>
+        </div>
+    </div>
+
+    <script>
+        // Load data on page load
+        loadResults();
+        loadHistory();
+        
+        // Auto-refresh every 2 seconds
+        setInterval(loadResults, 2000);
+        setInterval(loadHistory, 5000);
+
+        function loadResults() {
+            fetch('/api/stats')
+                .then(res => res.json())
+                .then(data => {
+                    // Summary
+                    const summaryDiv = document.getElementById('summary');
+                    summaryDiv.innerHTML = `
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h3>${data.totalVotes}</h3>
+                                <p>Total Votes</p>
+                            </div>
+                            <div class="stat-card highlight">
+                                <h3>${data.leader}</h3>
+                                <p>Current Leader</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Chart
+                    const chartDiv = document.getElementById('chart');
+                    chartDiv.innerHTML = data.stats.map(item => `
+                        <div class="chart-row">
+                            <div class="chart-label">${item.option}</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar" style="width: ${item.percentage}%">
+                                    <span>${item.count} votes (${item.percentage}%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => console.error('Error:', err));
+        }
+
+        function loadHistory() {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    const historyDiv = document.getElementById('history');
+                    if (data.history.length === 0) {
+                        historyDiv.innerHTML = '<p class="empty">No votes yet</p>';
+                        return;
+                    }
+
+                    historyDiv.innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Voter</th>
+                                    <th>Choice</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.history.map(vote => `
+                                    <tr>
+                                        <td>${vote.voter}</td>
+                                        <td><strong>${vote.option}</strong></td>
+                                        <td>${new Date(vote.timestamp).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                })
+                .catch(err => console.error('Error:', err));
+        }
+
+        function resetVotes() {
+            if (!confirm('Are you sure you want to reset all votes?')) {
+                return;
+            }
+
+            fetch('/api/reset', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ All votes have been reset!');
+                    loadResults();
+                    loadHistory();
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('❌ Error resetting votes');
+            });
+        }
+    </script>
+</body>
+</html>

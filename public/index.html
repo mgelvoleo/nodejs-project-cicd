@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Tools Voting</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 DevOps Tools Voting</h1>
+            <p>Which DevOps tool do you prefer?</p>
+        </header>
+
+        <div class="voting-section">
+            <div class="voter-info">
+                <input type="text" id="voterName" placeholder="Your name (optional)" />
+            </div>
+
+            <div class="options">
+                <div class="option-card" data-option="Docker">
+                    <div class="icon">🐳</div>
+                    <h3>Docker</h3>
+                    <p>Containerization Platform</p>
+                    <button onclick="vote('Docker')">Vote</button>
+                </div>
+
+                <div class="option-card" data-option="Kubernetes">
+                    <div class="icon">☸️</div>
+                    <h3>Kubernetes</h3>
+                    <p>Container Orchestration</p>
+                    <button onclick="vote('Kubernetes')">Vote</button>
+                </div>
+
+                <div class="option-card" data-option="Jenkins">
+                    <div class="icon">🔧</div>
+                    <h3>Jenkins</h3>
+                    <p>CI/CD Automation</p>
+                    <button onclick="vote('Jenkins')">Vote</button>
+                </div>
+
+                <div class="option-card" data-option="Terraform">
+                    <div class="icon">🏗️</div>
+                    <h3>Terraform</h3>
+                    <p>Infrastructure as Code</p>
+                    <button onclick="vote('Terraform')">Vote</button>
+                </div>
+
+                <div class="option-card" data-option="Ansible">
+                    <div class="icon">📜</div>
+                    <h3>Ansible</h3>
+                    <p>Configuration Management</p>
+                    <button onclick="vote('Ansible')">Vote</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-stats">
+            <h2>Current Stats</h2>
+            <div id="quickStats">Loading...</div>
+        </div>
+
+        <div class="actions">
+            <a href="/results" class="btn btn-secondary">View Detailed Results</a>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Load initial stats
+        loadStats();
+        setInterval(loadStats, 3000); // Refresh every 3 seconds
+
+        function loadStats() {
+            fetch('/api/votes')
+                .then(res => res.json())
+                .then(data => {
+                    const statsDiv = document.getElementById('quickStats');
+                    statsDiv.innerHTML = `
+                        <p><strong>Total Votes:</strong> ${data.totalVotes}</p>
+                        <div class="mini-chart">
+                            ${Object.entries(data.votes).map(([option, count]) => `
+                                <div class="mini-bar">
+                                    <span>${option}</span>
+                                    <div class="bar-container">
+                                        <div class="bar" style="width: ${data.totalVotes > 0 ? (count / data.totalVotes * 100) : 0}%"></div>
+                                    </div>
+                                    <span>${count}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                })
+                .catch(err => console.error('Error loading stats:', err));
+        }
+
+        function vote(option) {
+            const voterName = document.getElementById('voterName').value || 'Anonymous';
+            
+            fetch('/api/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ option, voter: voterName })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`✅ Vote for ${option} recorded!`, 'success');
+                    loadStats();
+                    
+                    // Highlight voted card
+                    document.querySelectorAll('.option-card').forEach(card => {
+                        card.classList.remove('voted');
+                    });
+                    document.querySelector(`[data-option="${option}"]`).classList.add('voted');
+                } else {
+                    showNotification('❌ Vote failed!', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showNotification('❌ Error recording vote', 'error');
+            });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
