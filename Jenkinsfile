@@ -125,6 +125,18 @@ pipeline {
             }
         }
 
+        stage('Update Deployment Manifest') {
+            steps {
+                script {
+                    echo '=== Updating Kubernetes deployment manifest ==='
+                    sh """
+                        sed -i 's|image:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
+                        cat k8s/deployment.yaml | grep image:
+                    """
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
