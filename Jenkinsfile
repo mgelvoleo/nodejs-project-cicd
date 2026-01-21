@@ -130,10 +130,10 @@ pipeline {
                 sh """
                 kubectl apply -f k8s/namespace.yaml
                 kubectl apply -f k8s/service.yaml
-                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/deployment.yaml || true
                             
                 # Wait for rollout
-                kubectl rollout status deployment/nodejs-app -n dev --timeout=300s"  
+                kubectl rollout status deployment/nodejs-app -n dev --timeout=300s 
 
                 """
             }
