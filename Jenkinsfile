@@ -127,7 +127,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh '''
+                sh """
                 kubectl apply -f k8s/namespace.yaml
                 kubectl apply -f k8s/service.yaml
                 kubectl apply -f k8s/deployment.yaml
@@ -135,7 +135,7 @@ pipeline {
                 # Wait for rollout
                 kubectl rollout status deployment/nodejs-app -n dev --timeout=300s"  
 
-                '''
+                """
             }
         }
 
