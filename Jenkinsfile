@@ -142,7 +142,12 @@ pipeline {
                 sh """
                 kubectl apply -f k8s/namespace.yaml
                 kubectl apply -f k8s/service.yaml
+                kubectl apply -f k8s/db-service.yaml
                 kubectl apply -f k8s/deployment.yaml || true
+                kubectl apply -f k8s/db-deployment.yaml || true
+
+                # Wait for MongoDB to be ready
+                kubectl wait --for=condition=ready pod -l app=mongodb -n dev --timeout=300s
                             
                 # Wait for rollout
                 kubectl rollout status deployment/nodejs-app -n dev --timeout=300s 

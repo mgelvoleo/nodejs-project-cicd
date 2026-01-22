@@ -386,3 +386,26 @@ tbody tr:hover {
         padding: 10px;
     }
 }
+
+.analytics-section {
+    margin-bottom: 40px;
+}
+
+.chart-container {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    height: 400px;
+}
+
+.chart-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.top-voters {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+}

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: voting-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: votingapp
+    volumes:
+      - mongodb_data:/data/db
+
+  app:
+    build: .
+    container_name: voting-app
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - PORT=3000
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb_data:

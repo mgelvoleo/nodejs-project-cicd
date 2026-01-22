@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Voting Analytics</h1>
+            <p>Advanced statistics and insights</p>
+        </header>
+
+        <div class="analytics-section">
+            <div class="chart-container">
+                <h2>Votes Over Time</h2>
+                <canvas id="hourlyChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Vote Distribution</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+
+            <div class="top-voters">
+                <h2>Top Voters</h2>
+                <div id="topVoters">Loading...</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="btn btn-primary">← Voting</a>
+            <a href="/results" class="btn btn-secondary">Results</a>
+        </div>
+    </div>
+
+    <script>
+        let hourlyChart, pieChart;
+
+        loadAnalytics();
+        loadStats();
+        setInterval(loadAnalytics, 10000);
+        setInterval(loadStats, 5000);
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/api/analytics');
+                const data = await res.json();
+
+                // Hourly votes chart
+                updateHourlyChart(data.hourlyVotes);
+
+                // Top voters
+                updateTopVoters(data.topVoters);
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                updatePieChart(data.stats);
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+
+        function updateHourlyChart(data) {
+            const ctx = document.getElementById('hourlyChart');
+            
+            if (hourlyChart) {
+                hourlyChart.destroy();
+            }
+
+            hourlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d._id).reverse(),
+                    datasets: [{
+                        label: 'Votes per Hour',
+                        data: data.map(d => d.count).reverse(),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updatePieChart(stats) {
+            const ctx = document.getElementById('pieChart');
+            
+            if (pieChart) {
+                pieChart.destroy();
+            }
+
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: stats.map(s => s.option),
+                    datasets: [{
+                        data: stats.map(s => s.count),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#4facfe',
+                            '#43e97b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateTopVoters(voters) {
+            const div = document.getElementById('topVoters');
+            
+            if (voters.length === 0) {
+                div.innerHTML = '<p class="empty">No named voters yet</p>';
+                return;
+            }
+
+            div.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Voter</th>
+                            <th>Votes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${voters.map((v, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${v._id}</td>
+                                <td><strong>${v.votes}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>
