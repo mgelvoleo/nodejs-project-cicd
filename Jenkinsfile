@@ -102,7 +102,19 @@ pipeline {
             }
         }
 
-
+        stage('Deploy to Kubernetes') {
+            steps {
+                sshagent(['ssh-k8s']) {
+                    script {
+                        echo 'Deploying to Kubernetes cluster...'
+                        sh """
+                            ansible-playbook -i ansible/inventories/dev/hosts ansible/playbooks/deploy.yml
+                        """
+                    }
+                }
+            }
+        }
+    
         
         
     }
