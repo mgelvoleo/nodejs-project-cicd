@@ -12,7 +12,7 @@
           metadata:
             name: "{{ kube_namespace }}"
 
-    - name: Deploy application
-      kubernetes.core.k8s:
+     kubernetes.core.k8s:
         state: present
-        src: "../../k8s/{{ env }}/"
+        src: "{{ playbook_dir }}/../../k8s/{{ env }}/"  # Added trailing slash
+        namespace: "{{ kube_namespace }}"  # Added namespace parameter
