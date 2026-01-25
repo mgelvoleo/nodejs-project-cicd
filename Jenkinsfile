@@ -103,29 +103,7 @@ pipeline {
         }
 
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sshagent(['ssh-k8s']) {
-                    script {
-                        echo 'Deploying to Kubernetes cluster...'
-                        sh """
-                            scp -o StrictHostKeyChecking=no k8s/namespace.yaml mgelvoleo@192.168.60.10:/tmp/
-                            scp -o StrictHostKeyChecking=no k8s/deployment.yaml mgelvoleo@192.168.60.10:/tmp/
-                            
-                            scp -o StrictHostKeyChecking=no k8s/service.yaml mgelvoleo@192.168.60.10:/tmp/
-                            ssh -o StrictHostKeyChecking=no mgelvoleo@192.168.60.10 "kubectl apply -f /tmp/namespace.yaml"
-                            ssh -o StrictHostKeyChecking=no mgelvoleo@192.168.60.10 "kubectl apply -f /tmp/service.yaml"
-                          
-                            ssh -o StrictHostKeyChecking=no mgelvoleo@192.168.60.10 "kubectl apply -f /tmp/deployment.yaml"
-                            
-                           
-                            # Wait for rollout
-                            ssh -o StrictHostKeyChecking=no mgelvoleo@192.168.60.10 "kubectl rollout status deployment/nodejs-app -n dev --timeout=300s"
-                        """
-                    }
-                }
-            }
-        }
+        
         
     }
 }
