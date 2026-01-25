@@ -1,8 +1,10 @@
+---
 - name: Deploy application to Kubernetes
   hosts: local
   gather_facts: false
 
   tasks:
+    
     - name: Apply namespace
       kubernetes.core.k8s:
         state: present
@@ -20,3 +22,4 @@
         - "../../k8s/{{ env }}/namespace.yaml"
         - "../../k8s/{{ env }}/deployment.yaml"
         - "../../k8s/{{ env }}/service.yaml 
+        - "../../k8s/{{ env }}/service.yaml"
