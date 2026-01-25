@@ -96,7 +96,7 @@ pipeline {
                 script {
                     echo 'Updating deployment manifest with new image tag...'
                     sh """
-                        sed -i 's|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/deployment.yaml
+                        sed -i 's|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/dev/deployment.yaml
                     """
                 }
             }
