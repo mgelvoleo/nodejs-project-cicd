@@ -1,0 +1,6 @@
+[local]
+localhost ansible_connection=local
+
+[all:vars]
+kube_namespace=prod
+env=prod

@@ -9,14 +9,29 @@ pipeline {
         KEEP_IMAGES = "5"
     }
 
+    parameters {
+        choice(name: 'ENV', choices: ['dev', 'test', 'prod'], description: 'Select the environment to deploy to')
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: 'main'
+                script {
+                    echo "Checking out correct branch for ${ENV} environment"
+
+                    def branchMapping = [
+                        'dev': 'main',
+                        'test': 'test',
+                        'prod': 'prod'
+                    ]
+                    
+                    git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: branchMapping[ENV]
+                }
+                
             }
         }
 
-        stage('Build Docker Image') {
+        /* stage('Build Docker Image') {
             steps {
                 script {
                     echo 'Building Docker image...'
@@ -26,9 +41,9 @@ pipeline {
                     """
                 }
             }
-        }
+        } */
 
-        stage('Push to DockerHub') {
+       /*  stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
@@ -46,8 +61,8 @@ pipeline {
                 }
             }
         }
-
-        stage('Cleanup Local Docker Images') {
+ */
+       /*  stage('Cleanup Local Docker Images') {
             steps {
                 script {
                     echo "🧹 Cleaning up local Docker images (keeping latest ${KEEP_IMAGES})"
@@ -60,9 +75,9 @@ pipeline {
                     """
                 }
             }
-        }
+        } */
 
-        stage('Cleanup Docker Hub Images') {
+        /* stage('Cleanup Docker Hub Images') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
@@ -89,9 +104,9 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
 
-        stage('Update K8s Deployment') {
+       /*  stage('Update K8s Deployment') {
             steps {
                 script {
                     echo 'Updating deployment manifest with new image tag...'
@@ -101,19 +116,19 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to Kubernetes') {
+ */
+        /* stage('Deploy to Kubernetes') {
             steps {
                 sshagent(['ssh-k8s']) {
                     script {
                         echo 'Deploying to Kubernetes cluster...'
                         sh """
-                            ansible-playbook -i ansible/inventories/dev/hosts ansible/playbooks/deploy.yml
+                            ansible-playbook -i ansible/inventories/${ENV}/hosts ansible/playbooks/deploy.yml
                         """
                     }
                 }
             }
-        }
+        } */
     
         
         
