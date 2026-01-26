@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    echo "Checking out correct branch for ${ENV} environment"
+                    echo "Checking out correct branch for ${params.ENV} environment"
 
                     def branchMapping = [
                         'dev': 'main',
@@ -25,7 +25,7 @@ pipeline {
                         'prod': 'prod'
                     ]
                     
-                    git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: branchMapping[ENV]
+                    git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: branchMapping[params.ENV]
                 }
                 
             }
