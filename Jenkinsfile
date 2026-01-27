@@ -43,7 +43,7 @@ pipeline {
             }
         }
 
-        /*stage('Push to DockerHub') {
+        stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
