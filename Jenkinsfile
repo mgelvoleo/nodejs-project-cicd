@@ -7,11 +7,27 @@ pipeline {
         IMAGE_TAG = "1.0.${BUILD_NUMBER}"
         KEEP_IMAGES = "5"
 
-        ENV = "${env.BRANCH_NAME == 'main' ? 'prod' :
-               env.BRANCH_NAME == 'test' ? 'test' : 'dev'}"
+        
     }
 
     stages {
+
+        stage('Set Environment') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        env.ENV = 'main'
+                    } else if (env.BRANCH_NAME == 'test') {
+                        env.ENV = 'test'
+                    } else {
+                        env.ENV = 'dev'
+                    }
+
+                    echo "🚀 Branch: ${env.BRANCH_NAME}"
+                    echo "🌍 Target ENV: ${env.ENV}"
+                }
+            }
+        }
 
         stage('Checkout') {
             steps {
@@ -46,7 +62,7 @@ pipeline {
             steps {
                 sh """
                     sed -i 's|image:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' \
-                    k8s/${ENV}/deployment.yaml
+                    k8s/${env.ENV}/deployment.yaml
                 """
             }
         }
@@ -56,7 +72,7 @@ pipeline {
                 sshagent(['ssh-k8s']) {
                     sh """
                         ansible-playbook \
-                        -i ansible/inventories/${ENV}/hosts \
+                        -i ansible/inventories/${env.ENV}/hosts \
                         ansible/playbooks/deploy.yml
                     """
                 }
