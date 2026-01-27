@@ -4,9 +4,15 @@ pipeline {
 
     environment {
         IMAGE_NAME = "nodejs-k8s-app"
-        IMAGE_TAG = "1.0.${BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "mgelvoleo"
         KEEP_IMAGES = "5"
+
+        // Image tag tied to ENV + build number
+        IMAGE_TAG = "${ENV}-1.0.${BUILD_NUMBER}"
+
+        // Map environment paths
+        K8S_PATH = "k8s/${ENV}"
+        INVENTORY_PATH = "ansible/inventories/${ENV}/hosts"
     }
 
     parameters {
@@ -31,17 +37,17 @@ pipeline {
             }
         }
 
-        /* stage('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     echo 'Building Docker image...'
                     sh """
                         docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${ENV}-latest
                     """
                 }
             }
-        } */
+        }
 
        /*  stage('Push to DockerHub') {
             steps {
