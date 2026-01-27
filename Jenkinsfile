@@ -46,16 +46,15 @@ pipeline {
        stage('Cleanup Local Docker Images') {
             steps {
                 script {
-                    echo "🧹 Cleaning up local Docker images (keeping latest ${KEEP_IMAGES})"
+                    echo "🧹 Cleaning up local Docker images (keeping latest ${env.KEEP_IMAGES})"
 
                     sh '''
-                        docker images ${DOCKERHUB_USERNAME}/${IMAGE_NAME} \
-                        --format '{{.Repository}}:{{.Tag}} {{.CreatedAtUnix}}' | \
+                        docker image ls "${DOCKERHUB_USERNAME}/${IMAGE_NAME}" \
+                        --filter "reference=*:${ENV}-*" \
+                        --format '{{.Repository}}:{{.Tag}}' | \
                         grep -v ':latest' | \
-                        sort -rk2 | \
                         tail -n +$((KEEP_IMAGES+1)) | \
-                        awk '{print \$1}' | \
-                        xargs -r docker rmi -f || true
+                        xargs -r docker rmi -f 2>/dev/null || true
                     '''
                 }
             }
