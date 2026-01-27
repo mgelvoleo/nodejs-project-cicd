@@ -47,12 +47,9 @@ pipeline {
 
             when {
                 anyOf {
-                    expression {
-                        env.BRANCH_NAME == 'main'
-                    }
-                    expression {
-                        env.BRANCH_NAME == 'prod'
-                    }
+                    branch 'main'
+                    branch 'prod'
+                }
             }
             steps {
                 script {
