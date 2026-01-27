@@ -48,7 +48,7 @@ pipeline {
                 script {
                     echo "🧹 Cleaning up local Docker images (keeping latest ${KEEP_IMAGES})"
 
-                    sh """
+                    sh '''
                         docker images ${DOCKERHUB_USERNAME}/${IMAGE_NAME} \
                         --format '{{.Repository}}:{{.Tag}} {{.CreatedAtUnix}}' | \
                         grep -v ':latest' | \
@@ -56,7 +56,7 @@ pipeline {
                         tail -n +$((KEEP_IMAGES+1)) | \
                         awk '{print \$1}' | \
                         xargs -r docker rmi -f || true
-                    """
+                    '''
                 }
             }
         }
