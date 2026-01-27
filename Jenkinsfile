@@ -16,7 +16,7 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'ENV', choices: ['dev', 'test', 'prod'], description: 'Select the environment to deploy to')
+        choice(name: 'ENV', choices: ['dev', 'main', 'prod'], description: 'Select the environment to deploy to')
     }
 
     stages {
@@ -26,8 +26,8 @@ pipeline {
                     echo "Checking out correct branch for ${params.ENV} environment"
 
                     def branchMapping = [
-                        'dev': 'main',
-                        'test': 'test',
+                        'dev': 'dev',
+                        'main': 'main',
                         'prod': 'prod'
                     ]
                     
