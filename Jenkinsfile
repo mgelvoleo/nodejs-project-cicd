@@ -43,19 +43,24 @@ pipeline {
             }
         }
 
-        stage('Cleanup Local Docker Images') {
+       stage('Cleanup Local Docker Images') {
             steps {
-                sh '''
+                script {
                     echo "🧹 Cleaning up local Docker images (keeping latest ${KEEP_IMAGES})"
 
-                    docker images ${IMAGE_NAME} --format "{{.Repository}}:{{.Tag}} {{.CreatedAt}}" | \
-                    sort -rk2 | \
-                    tail -n +$((${KEEP_IMAGES}+1)) | \
-                    awk '{print $1}' | \
-                    xargs -r docker rmi -f || true
-                '''
+                    sh """
+                        docker images ${DOCKERHUB_USERNAME}/${IMAGE_NAME} \
+                        --format '{{.Repository}}:{{.Tag}} {{.CreatedAtUnix}}' | \
+                        grep -v ':latest' | \
+                        sort -rk2 | \
+                        tail -n +$((KEEP_IMAGES+1)) | \
+                        awk '{print \$1}' | \
+                        xargs -r docker rmi -f || true
+                    """
+                }
             }
         }
+
 
         stage('Push to DockerHub') {
             steps {
