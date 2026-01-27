@@ -49,7 +49,7 @@ pipeline {
             }
         }
 
-       /*  stage('Push to DockerHub') {
+        stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
@@ -61,13 +61,13 @@ pipeline {
                         sh """
                             echo ${DOCKER_PASS} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
                             docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                            docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+                            docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${ENV}-latest
                         """
                     }
                 }
             }
         }
- */
+
        /*  stage('Cleanup Local Docker Images') {
             steps {
                 script {
