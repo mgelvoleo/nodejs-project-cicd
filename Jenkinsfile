@@ -15,12 +15,12 @@ pipeline {
         stage('Set Environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main') {
-                        env.ENV = 'main'
-                    } else if (env.BRANCH_NAME == 'test') {
-                        env.ENV = 'test'
-                    } else {
+                    if (env.BRANCH_NAME == 'dev') {
                         env.ENV = 'dev'
+                    } else if (env.BRANCH_NAME == 'main') {
+                        env.ENV = 'main'
+                    } else {
+                        env.ENV = 'prod'
                     }
 
                     echo "🚀 Branch: ${env.BRANCH_NAME}"
@@ -43,7 +43,7 @@ pipeline {
             }
         }
 
-        stage('Push to DockerHub') {
+        /*stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
@@ -58,14 +58,14 @@ pipeline {
             }
         }
 
-        stage('Update K8s Manifest') {
+        /*stage('Update K8s Manifest') {
             steps {
                 sh """
                     sed -i 's|image:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' \
                     k8s/${env.ENV}/deployment.yaml
                 """
             }
-        }
+        }*/
 
         /* stage('Deploy to Kubernetes') {
             steps {
