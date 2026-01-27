@@ -77,25 +77,19 @@ pipeline {
                     sh '''
                         echo "🧹 Cleaning up Docker Hub images (keeping latest ${KEEP_IMAGES})"
 
-                        # Get authentication token
                         TOKEN=$(curl -s -X POST https://hub.docker.com/v2/users/login/ \
                         -H "Content-Type: application/json" \
-                        -d '{"username": "'"$DOCKER_USER"'", "password": "'"$DOCKER_PASS"'"}' | \
-                        jq -r .token)
+                        -d '{"username": "'"$DOCKER_USER"'", "password": "'"$DOCKER_PASS"'"}' | jq -r .token)
 
-                        # Use full repository path: username/repository
-                        REPO_PATH="${DOCKERHUB_USERNAME}/${IMAGE_NAME}"
-                        
-                        # List tags and delete old ones (keeping latest KEEP_IMAGES)
                         curl -s -H "Authorization: JWT $TOKEN" \
-                        "https://hub.docker.com/v2/repositories/${REPO_PATH}/tags/?page_size=100" | \
-                        jq -r '.results | map(select(.name | startswith("1.0."))) | sort_by(.last_updated) | reverse | .[${KEEP_IMAGES}:] | .[].name' | \
+                        "https://hub.docker.com/v2/repositories/$DOCKERHUB_USERNAME/$IMAGE_NAME/tags/?page_size=100" | \
+                        jq -r '.results | map(select(.name | startswith("1.0."))) | sort_by(.last_updated) | reverse | .['"${KEEP_IMAGES}"':] | .[].name' | \
                         while read TAG; do
                             echo "Deleting remote tag: $TAG"
                             curl -s -X DELETE \
                             -H "Authorization: JWT $TOKEN" \
-                            "https://hub.docker.com/v2/repositories/${REPO_PATH}/tags/${TAG}/"
-                            sleep 1  # Add small delay to avoid rate limiting
+                            "https://hub.docker.com/v2/repositories/$DOCKERHUB_USERNAME/$IMAGE_NAME/tags/$TAG/"
+                            sleep 1
                         done
                     '''
                 }
