@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-       /*  stage('Cleanup Local Docker Images') {
+       stage('Cleanup Local Docker Images') {
             steps {
                 script {
                     echo "🧹 Cleaning up local Docker images (keeping latest ${KEEP_IMAGES})"
@@ -76,7 +76,7 @@ pipeline {
                     """
                 }
             }
-        } */
+        } 
 
         /* stage('Cleanup Docker Hub Images') {
             steps {
