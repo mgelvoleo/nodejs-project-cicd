@@ -2,28 +2,26 @@
 pipeline {
     agent any
 
+  
+    parameters {
+        choice(name: 'DEPLOY_ENV', choices: ['dev', 'main', 'prod'], description: 'Select the environment to deploy to')
+    }
+
     environment {
         IMAGE_NAME = "nodejs-k8s-app"
         DOCKERHUB_USERNAME = "mgelvoleo"
         KEEP_IMAGES = "5"
 
-        // Image tag tied to ENV + build number
-        IMAGE_TAG = "${ENV}-1.0.${BUILD_NUMBER}"
-
-        // Map environment paths
-        K8S_PATH = "k8s/${ENV}"
-        INVENTORY_PATH = "ansible/inventories/${ENV}/hosts"
-    }
-
-    parameters {
-        choice(name: 'ENV', choices: ['dev', 'main', 'prod'], description: 'Select the environment to deploy to')
+        IMAGE_TAG = "${params.DEPLOY_ENV}-1.0.${BUILD_NUMBER}"
+        K8S_PATH = "k8s/${params.DEPLOY_ENV}"
+        INVENTORY_PATH = "ansible/inventories/${params.DEPLOY_ENV}/hosts"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    echo "Checking out correct branch for ${params.ENV} environment"
+                    echo "Checking out correct branch for ${params.DEPLOY_ENV} environment"
 
                     def branchMapping = [
                         'dev': 'dev',
@@ -31,7 +29,7 @@ pipeline {
                         'prod': 'prod'
                     ]
                     
-                    git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: branchMapping[params.ENV]
+                    git url: "https://github.com/mgelvoleo/nodejs-project-cicd.git", branch: branchMapping[params.DEPLOY_ENV]
                 }
                 
             }
@@ -43,7 +41,7 @@ pipeline {
                     echo 'Building Docker image...'
                     sh """
                         docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${ENV}-latest
+                        docker tag ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${params.DEPLOY_ENV}-latest
                     """
                 }
             }
@@ -59,7 +57,7 @@ pipeline {
                     sh """
                         echo ${DOCKER_PASS} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
                         docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${ENV}-latest
+                        docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${params.DEPLOY_ENV}-latest
                     """
                 }
             }
