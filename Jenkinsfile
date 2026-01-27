@@ -68,7 +68,7 @@ pipeline {
         }
 
 
-         stage('Cleanup Docker Hub Images') {
+        stage('Cleanup Docker Hub Images') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
