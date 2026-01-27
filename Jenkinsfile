@@ -44,6 +44,16 @@ pipeline {
         }
 
        stage('Cleanup Local Docker Images') {
+
+            when {
+                anyOf {
+                    expression {
+                        env.BRANCH_NAME == 'main'
+                    }
+                    expression {
+                        env.BRANCH_NAME == 'prod'
+                    }
+            }
             steps {
                 script {
                     echo "🧹 Cleaning up local Docker images (keeping latest ${env.KEEP_IMAGES})"
