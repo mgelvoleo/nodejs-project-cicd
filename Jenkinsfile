@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -52,7 +51,7 @@ pipeline {
             }
         }
 
-       /*  stage('Deploy to Kubernetes') {
+        /* stage('Deploy to Kubernetes') {
             steps {
                 sshagent(['ssh-k8s']) {
                     sh """
@@ -63,5 +62,6 @@ pipeline {
                 }
             }
         } */
+
     }
 }
