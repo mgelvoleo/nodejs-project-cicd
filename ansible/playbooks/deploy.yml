@@ -1,28 +1,39 @@
 ---
 - name: Deploy application to Kubernetes
-  hosts: local
+  hosts: localhost
   gather_facts: false
 
   vars:
     kube_namespace: "{{ env }}"
     image_name: "mgelvoleo/nodejs-k8s-app"
     image_tag: "{{ image_tag }}"
-    replicas: "{{ replicas | default(1) }}"
+    replicas: 1
+    rendered_dir: "/tmp/k8s-rendered"
 
   tasks:
 
     - name: Ensure namespace exists
       kubernetes.core.k8s:
-        state: present
         api_version: v1
         kind: Namespace
         name: "{{ kube_namespace }}"
+        state: present
 
-    - name: Deploy Kubernetes manifests
+    - name: Create render directory
+      file:
+        path: "{{ rendered_dir }}"
+        state: directory
+
+    - name: Render deployment manifest
+      template:
+        src: "../../k8s/{{ env }}/deployment.yaml.j2"
+        dest: "{{ rendered_dir }}/deployment.yaml"
+
+    - name: Apply Kubernetes manifests
       kubernetes.core.k8s:
         state: present
         namespace: "{{ kube_namespace }}"
         src: "{{ item }}"
       loop:
-        - "../../k8s/{{ env }}/deployment.yaml"
+        - "{{ rendered_dir }}/deployment.yaml"
         - "../../k8s/{{ env }}/service.yaml"
