@@ -1,20 +1,47 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: python-app
-  namespace: main
+  name: nodejs-app
+  namespace: {{ kube_namespace }}
 spec:
-  replicas: 1
+  replicas: {{ replicas | default(1) }}
   selector:
     matchLabels:
-      app: python-app
+      app: nodejs-app
   template:
     metadata:
       labels:
-        app: python-app
+        app: nodejs-app
     spec:
       containers:
-      - name: python-app
-        image: IMAGE_NAME
+      - name: nodejs-app
+        image: {{ image_name }}:{{ image_tag }}
         ports:
-        - containerPort: 8000
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: MONGO_URL
+          value: "mongodb://mongodb-service:27017"
+        - name: NODE_ENV
+          value: "{{ env }}"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
