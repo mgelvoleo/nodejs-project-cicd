@@ -111,6 +111,8 @@ pipeline {
             }
         }
 
+       
+
         stage('Update K8s Manifest') {
             steps {
                 sh """
@@ -120,13 +122,36 @@ pipeline {
             }
         }   
 
+        stage('Approval for PROD') {
+            when {
+                branch 'prod'
+            }
+            steps {
+                input message: "🚨 Deploy to PROD environment?", ok: "Deploy"
+            }   
+        }
+
+
+        
+
         stage('Deploy to Kubernetes') {
+
+            when {
+                anyOf {
+                    branch 'dev'
+                    branch 'main'
+                    branch 'prod'
+                }
+            }
+
             steps {
                 sshagent(['ssh-k8s']) {
                     sh """
                         ansible-playbook \
                         -i ansible/inventories/${env.ENV}/hosts \
-                        ansible/playbooks/deploy.yml
+                        ansible/playbooks/deploy.yml \
+                        -e "env=${env.ENV}" \
+                        -e "image_tag=${IMAGE_TAG}"  
                     """
                 }
             }
