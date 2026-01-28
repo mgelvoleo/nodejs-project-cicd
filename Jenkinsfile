@@ -115,7 +115,7 @@ pipeline {
             steps {
                 sh """
                     sed -i 's|image:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' \
-                    k8s/${env.ENV}/deployment.yaml
+                    k8s/${env.ENV}/deployment.yaml.j2
                 """
             }
         }   
