@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nodejs-app
-  namespace: {{ kube_namespace }}
+  namespace: prod
 spec:
   selector:
     app: nodejs-app
