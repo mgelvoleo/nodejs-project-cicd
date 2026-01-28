@@ -3,23 +3,26 @@
   hosts: local
   gather_facts: false
 
+  vars:
+    kube_namespace: "{{ env }}"
+    image_name: "mgelvoleo/nodejs-k8s-app"
+    image_tag: "{{ image_tag }}"
+    replicas: "{{ replicas | default(1) }}"
+
   tasks:
-    
-    - name: Apply namespace
+
+    - name: Ensure namespace exists
       kubernetes.core.k8s:
         state: present
-        definition:
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: "{{ kube_namespace }}"
+        api_version: v1
+        kind: Namespace
+        name: "{{ kube_namespace }}"
 
     - name: Deploy Kubernetes manifests
       kubernetes.core.k8s:
         state: present
+        namespace: "{{ kube_namespace }}"
         src: "{{ item }}"
       loop:
-        - "../../k8s/{{ env }}/namespace.yaml"
         - "../../k8s/{{ env }}/deployment.yaml"
         - "../../k8s/{{ env }}/service.yaml"
-        

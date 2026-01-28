@@ -3,9 +3,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nodejs-app
-  namespace: dev
+  namespace: {{ kube_namespace }}
 spec:
-  replicas: 3
+  replicas: {{ replicas | default(1) }}
   selector:
     matchLabels:
       app: nodejs-app
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nodejs-app
-        image: mgelvoleo/nodejs-k8s-app:latest
+        image: {{ image_name }}:{{ image_tag }}
         ports:
         - containerPort: 3000
         env:
@@ -25,7 +25,7 @@ spec:
         - name: MONGO_URL
           value: "mongodb://mongodb-service:27017"
         - name: NODE_ENV
-          value: "production"
+          value: "{{ env }}"
         resources:
           requests:
             memory: "128Mi"
@@ -39,11 +39,9 @@ spec:
             port: 3000
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 3
         readinessProbe:
           httpGet:
             path: /api/health
             port: 3000
           initialDelaySeconds: 10
           periodSeconds: 5
-          timeoutSeconds: 3
