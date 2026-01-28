@@ -43,7 +43,7 @@ pipeline {
             }
         }
 
-       stage('Cleanup Local Docker Images') {
+        stage('Cleanup Local Docker Images') {
 
             when {
                 anyOf {
@@ -111,14 +111,14 @@ pipeline {
             }
         }
 
-        /*stage('Update K8s Manifest') {
+        stage('Update K8s Manifest') {
             steps {
                 sh """
                     sed -i 's|image:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|' \
                     k8s/${env.ENV}/deployment.yaml
                 """
             }
-        }*/
+        }   
 
         /* stage('Deploy to Kubernetes') {
             steps {
