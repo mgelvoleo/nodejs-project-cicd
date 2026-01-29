@@ -48,6 +48,15 @@ pipeline {
                 }
             }
         }
+
+         stage('Lint Code') {
+            steps {
+                script {
+                    echo '🔍 Running ESLint...'
+                    sh 'npm run lint || true'
+                }
+            }
+        }
         
 
         stage('Build Docker Image') {
