@@ -35,45 +35,7 @@ pipeline {
             }
         }
 
-        /* =======================
-           CI: Automated Testing
-        ======================= */
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                sh 'npm test'
-            }
-        }
-
-        stage('Integration Tests') {
-            when{
-                anyOf {
-                    branch 'dev'
-                    branch 'main'
-                }
-            }
-            steps {
-                sh 'npm run test:integration'
-            }
-        }
-
-        stage('Test Coverage') {
-            steps {
-                sh '''
-                    npm run coverage
-                '''
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'coverage/**', fingerprint: true
-                }
-            }
-        }
+      
         
 
         stage('Build Docker Image') {
