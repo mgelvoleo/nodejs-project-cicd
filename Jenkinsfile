@@ -35,7 +35,19 @@ pipeline {
             }
         }
 
-      
+
+        // ============================================
+        // TESTING STAGES
+        // ============================================
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    echo '📦 Installing dependencies...'
+                    sh 'npm ci'
+                }
+            }
+        }
         
 
         stage('Build Docker Image') {
